@@ -1,0 +1,170 @@
+<html>
+  <head>
+  <style>
+  .float-container {
+    border: 3px solid #fff;
+    padding: 20px;
+  }
+  .float-child {
+    width: 50%;
+    float: left;
+    padding: 20px;
+    border: 2px solid red;
+  }
+  .flex-container {
+    display: flex;
+    padding: 20px;
+  }
+
+  .flex-child {
+      flex: 1;
+      border: 2px solid black;
+      padding: 20px;
+      margin-right: 20px;
+  }
+
+  .flex-child:first-child {
+      margin-right: 20px;
+  }
+  .results {
+    background-color: #E5E4E2;
+    padding: 15px;
+    font-size: 1.3em;
+    border-radius: 10px;
+  }
+  .wrapper {
+    width: 1200px;
+    margin: auto;
+  }
+  .selection-wrapper {
+    width: 800px;
+    margin: auto;
+  }
+  .warning > p {
+    text-align: center;
+  }
+  </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>ROP Regexr</h1>
+      <hr />
+      <form method="post">
+        <label for="action">Choose an action:</label>
+        <select name="action" id="action-select" onchange="getRegexs()">
+          {% for key, value in available_actions.items() %}
+          <option value="{{ key }}" {% if selected_action==key %}selected{% endif %}>{{value["name"]}}</option>
+          {% endfor %}
+        </select>
+        <div class="selection-wrapper">
+          <div class="warning" id="warning"></div>
+          <div class="flex-container">
+            <!-- Source -->
+            <div class="flex-child">
+                <p>Source</p>
+                <ul>
+                    {% for reg in registers %}
+                    <li>
+                      <label for="source-{{ reg }}">
+                        <input type="radio" id="source-{{ reg }}" name="source-radios" value="{{ reg }}" {% if source==reg %}checked{% endif %} onclick="getRegexs();"/>
+                        {{ reg.upper() }}
+                      </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <!-- dest -->
+            <div class="flex-child">
+              <p>Dest</p>
+                <ul>
+                    {% for reg in registers %}
+                    <li>
+                        <label for="dest-{{reg}}">
+                          <input type="radio" id="dest-{{reg}}" name="dest-radios" value="{{reg}}" {% if dest==reg %}checked{% endif %} onclick="getRegexs();"/>
+                          {{reg.upper()}}
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="flex-child">
+              <p>Options</p>
+              <ul>
+                {% for key, value in options.items() %}
+                <li>
+                  <label for="option-{{key}}">
+                    <input type="checkbox" id="{{key}}" name="option-checkboxes" {% if options[key]['status'] %}checked{% endif %} onclick="getRegexs();"/>
+                    {{options[key]["name"]}}
+                  </label>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <hr />
+    <div class="results" id="results">
+    </div>
+    <script>
+      const actionElem = document.getElementById("action-select");
+      const sourceElems = document.getElementsByName("source-radios");
+      const destElems = document.getElementsByName("dest-radios");
+      const resultsElem = document.getElementById("results");
+      const warningElem = document.getElementById("warning");
+      const optionElems = document.getElementsByName("option-checkboxes")
+
+      function copyToClipboard(currObj) {
+        const parentOfSelected = currObj.parentNode;
+        const children = parentOfSelected.childNodes;
+        for (const child of children) {
+          if (child.className === "code") {
+            navigator.clipboard.writeText(child.textContent);
+          }
+        }
+      }
+
+      async function getRegexs() {
+        let source;
+        let dest;
+        let action;
+        let selectedOptions = [];
+
+        for (const entry of sourceElems) {
+          if (entry.checked) source = entry.value;
+        }
+        for (const entry of destElems) {
+          if (entry.checked) dest = entry.value;
+        }
+        for (const elem of optionElems) {
+          if (elem.checked) {
+            selectedOptions.push(elem.id)
+          }
+        }
+        action = actionElem.value;
+        const data = {
+          action: action,
+          source: source,
+          dest: dest,
+          options: selectedOptions,
+        }
+        const response = await fetch('/api/get-regexs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        resultsElem.innerHTML = "";
+        const responseData = await response.json();
+        for (let regex of responseData["results"]["regexs"]) {
+          const html = `<p><span id=\"action-span\"><code class=\"code\">${regex}</code>&nbsp;&nbsp;<button onclick=\"copyToClipboard(this)\">Copy</button></span></p>`;
+          resultsElem.insertAdjacentHTML("beforeend", html);
+        }
+        warningElem.innerHTML = `<p>${responseData["results"]["help"]}</p>`;
+      }
+      getRegexs();
+    </script>
+  </body>
+</html>
