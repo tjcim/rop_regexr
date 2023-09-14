@@ -25,7 +25,7 @@ AVAILABLE_ACTIONS = {
         "name": "Add/Subtract",
         "regexs": [
             r"(?:add|adc|sub|sbb) (?P&lt;dest&gt;{source}), (?!\1)(?:{source}|{dest})",
-            r"(?:add|adc|sub|sbb) (?:{source}), 0x.*?;",
+            r"(?:add|adc|sub|sbb) (?:{source}), 0x.*?[ ]*;",
         ],
         "help": "When adding an immediate value, only the source regex is used."
     },
@@ -65,7 +65,7 @@ AVAILABLE_ACTIONS = {
     "interrupt": {
         "name": "Interrupt",
         "regexs": [
-            r"int3;",
+            r"int3[ ]*;",
         ],
         "help": "Source and destination registers are ignored.",
     },
@@ -89,7 +89,7 @@ def format_action(action_name, source, dest, options):
         if option == 'no_call':
             regexs = [rf"(?!.*call.*){item}" for item in regexs]
         if option == 'no_large_retn':
-            regexs = [rf"{item}.*(?:ret;|retn 0x00[012][02468ACE];)" for item in regexs]
+            regexs = [rf"{item}.*(?:ret[ ]*;|retn 0x00[012][02468ACE][ ]*;)" for item in regexs]
         if option == 'no_esp':
             regexs = [rf"(?!.*esp.*){item}" for item in regexs]
     return {"regexs": regexs, "help": AVAILABLE_ACTIONS[action_name].get("help")}
