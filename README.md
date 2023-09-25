@@ -1,8 +1,10 @@
 # ROP RegExr
 
-Creates regular expressions to use when building a ROP chain
+Web application built on Flask that creates regular expressions to use when building a ROP chain
 
-## Run
+![ROP RegExr](images/screenshot.png)
+
+## Getting Started
 
 The repository comes with a `Makefile` with commands for:
 
@@ -10,6 +12,10 @@ The repository comes with a `Makefile` with commands for:
 * `run`
 * `run_static`
 * `down`
+
+### TLDR
+
+Clone this repo and change into the cloned directory. Run `make build`, then `make run`. Look at the output for the port then visit `http://localhost:<port assigned>`.
 
 ### `build`
 
