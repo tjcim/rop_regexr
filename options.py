@@ -30,15 +30,15 @@ AVAILABLE_ACTIONS = {
         "name": "Dereference Source",
         "regexs": [
             r"mov {dest}, (?:dword )?\[{source}(?:[\+-]0x.*?)?\]",
-            r"(?:add|adc|xor|or|and|sub|sbb|xchg) (?P&lt;dest&gt;{dest}), \[{source}(?:[\+-]0x.*?)?\]",
+            r"(?:add|adc|xor|or|and|sub|sbb|xchg) (?P&lt;dest&gt;{dest}), (?:dword )?\[{source}(?:[\+-]0x.*?)?\]",
         ],
         "help": "",
     },
     "deref_dest": {
         "name": "Dereference Dest",
         "regexs": [
-            r"mov \[{dest}(?:[\+-]0x.*?)?\], (?:dword )?{source}",
-            r"(?:add|adc|xor|or|and|sub|sbb|xchg) (?P&lt;dest&gt;\[{dest}(?:[\+-]0x.*?)?\]), {source}",
+            r"mov (?:dword )?\[{dest}(?:[\+-]0x.*?)?\], {source}",
+            r"(?:add|adc|xor|or|and|sub|sbb|xchg) (?:dword )?(?P&lt;dest&gt;\[{dest}(?:[\+-]0x.*?)?\]), {source}",
         ],
         "help": "",
     },
